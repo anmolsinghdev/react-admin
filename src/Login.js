@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { loginUser } from './admin/hook/LoginUser';
 
 function Login() {
+  const navigate = useNavigate();
   const [inputValue, setInputValue] = useState({
     username: '',
     password: '',
@@ -14,7 +16,8 @@ function Login() {
     console.log('inputValue', errorValidation);
   }, [errorValidation]);
 
-  const validation = () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     let error = {};
     if (inputValue.username === '' || inputValue.password === '') {
       if (inputValue.username === '') {
@@ -32,6 +35,12 @@ function Login() {
       setErrorValidation({ ...errorValidation, ...error });
     } else {
       setErrorValidation({});
+      if (inputValue.username === '' || inputValue.password === '') return;
+      loginUser(inputValue, (data) => {
+        const { token } = data;
+        sessionStorage.setItem('token', JSON.stringify(token));
+        navigate('/admin');
+      });
     }
 
     if (Object.keys(errorValidation).length > 0) {
@@ -68,30 +77,30 @@ function Login() {
     }
   };
 
-  async function loginUser(credentials) {
-    // const {user_name, user_password} = credentials;
-    return fetch('https://dummyjson.com/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: 'kminchelle',
-        password: '0lelplR',
-        // expiresInMins: 60, // optional
-      }),
-    }).then((data) => data.json());
-  }
+  // async function loginUser(credentials) {
+  //   // const {user_name, user_password} = credentials;
+  //   return fetch('https://dummyjson.com/auth/login', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({
+  //       username: 'kminchelle',
+  //       password: '0lelplR',
+  //       // expiresInMins: 60, // optional
+  //     }),
+  //   }).then((data) => data.json());
+  // }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (validation()) {
-      const data = await loginUser(inputValue);
-      const { token } = data;
-      sessionStorage.setItem('token', JSON.stringify(token));
-      console.log('Logged User Info ', token);
-    } else {
-      console.log('Form Not Submitted!');
-    }
-  };
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   if (validation()) {
+  //     const data = await loginUser(inputValue);
+  //     const { token } = data;
+  //     sessionStorage.setItem('token', JSON.stringify(token));
+  //     console.log('Logged User Info ', token);
+  //   } else {
+  //     console.log('Form Not Submitted!');
+  //   }
+  // };
 
   return (
     <div className="hold-transition login-page">
